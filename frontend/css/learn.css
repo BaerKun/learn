@@ -1,0 +1,106 @@
+/*选择器*/
+p {
+    /*对所有<p>元素适用*/
+    color: black;
+}
+
+#id1 {
+    /*只对指定id适用，以#开头*/
+    color: #ff0000;
+}
+
+.cls1 {
+    /*通过class属性选择*/
+    color: rgb(0, 0, 255);
+}
+
+p.cls2 {
+    /*只有<p>元素才可以选择*/
+    color: blueviolet;
+}
+
+/* 注意id/class名第一位不要是数字*/
+
+/* 同名选择器，同名属性，后来者会覆盖前者*/
+
+/* 优先级：（内联样式）Inline style > （内部样式）Internal style sheet >
+（外部样式）External style sheet > 浏览器默认样式*/
+
+.background_test {
+    background-color: #ffff00;
+    background-image: url('bear.jpeg');
+
+    /* 平铺方式，默认水平+垂直(repeat) */
+    background-repeat: no-repeat;
+    /*repeat -x/y no-repeat*/
+
+    /* 背景图片是否移动，默认跟随页面滚动*/
+    background-attachment: scroll;
+    /*fixed*/
+
+    /* 图片位置(x, y)，默认靠左上*/
+    background-position: left top;
+    /*  可选 left/right/center/top/bottom 的组合，
+        除center有x, y之分，其余没有，指代靠元素的上下左右边缘；
+        x% y% 上述的细化，0% 0% <=> left top 100% 100% <=> right bottom;
+        xpx ypx：图像左上角和元素左上角的绝对位置
+     */
+}
+
+.text_test {
+    color: black;
+    letter-spacing: 2px;
+    /*字间距*/
+    word-spacing: 5px;
+
+    line-height: 110%;
+    /*行间距 %/px */
+    text-indent: 40px;
+    /*段缩进*/
+
+    /* 对齐，默认左对齐*/
+    text-align: left;
+    /*  left/start：左对齐
+        right/end：右对齐
+        center：居中
+        justify：两端对齐
+    */
+
+    /* 添加修饰*/
+    text-decoration: underline wavy red;
+
+    text-transform: capitalize;
+    /*  uppercase/lowercase：大小写变换
+        capitalize：每个单词首字母大写
+    */
+
+    white-space: normal;
+    /*  空白符设置 （' ''\n''\t' ...）
+        normal：重复压缩，根据宽度自动换行
+        nowrap：重复压缩，不会自动，而只有<br>才会换行
+        pre：保留所有空白符，不会自动空行（但可以通过\n）
+        pre-wrap：保留空白，自动空行
+        pre-wrap：除\n外的空白符被压缩，自动空行
+        */
+
+    /* 字体大小*/
+    font-size: 16px;
+}
+
+/*  链接样式，分别对应：
+    未点击、已访问、鼠标接触、鼠标点击
+a:link {};
+a:visited {};
+a:hover {};
+a:active {};
+*/
+
+/*  盒子模型 border*/
+.box {
+    background-color: antiquewhite;
+    width: 300px;
+    padding: 20px;
+    border: 20px solid greenyellow;
+    margin: 20px;
+    /*  内容宽度、内边距、边框、外间距*/
+}

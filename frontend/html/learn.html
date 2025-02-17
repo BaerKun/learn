@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <title> 瑟熊世界 </title>
+
+</head>
+
+<body>
+  <!-- 标题<h1> - <h6> 大 - 小 -->
+  <h1> 标题一 </h1>
+
+  <!-- 段落 -->
+  <p>
+    <b> Hello </b> <!-- 粗体 -->
+    <i> world! </i> <!-- 斜体 -->
+    <sup> 6 </sup> <!-- 上标 -->
+    <sub> 9 </sub> <!-- 下标 -->
+    <hr> <!-- 水平线 -->
+    <br> <!-- 换行 -->
+  </p>
+
+  <h2>表单</h2>
+  <form>
+    <label>用户:
+      <input type="text" required>
+    </label>
+    <br>
+
+    <label>密码:
+      <input type="password" required>
+    </label>
+    <br>
+
+    性别:
+    <label>男
+      <input type="radio" name="gender" value="male" checked>
+    </label>
+    <label>女
+      <input type="radio" name="gender" value="female">
+    </label>
+    <br>
+
+    <label>❤️熊王
+      <input type="checkbox" name="BearKing" checked>
+    </label>
+    <label>❤️亚瑟
+      <input type="checkbox" name="Arthur" checked>
+    </label>
+    <br>
+
+    <label for="country">国籍</label>
+    <select id="country" name="country">
+      <option value="SX">瑟熊</option>
+      <option value="JI">鸡</option>
+      <option value="other">其他</option>
+    </select>
+    <br>
+
+    <input type="submit" value="TiJio">
+  </form>
+
+  <br>
+  <a href="https://github.com/BaerKun" target="_blank" title="打开gitnub"> github link </a>
+  <!--
+      href="link"
+          =“#xxx”  导航到本页面id为xxx的位置
+          ="#"  导航到页面顶部
+          =""   刷新页面
+
+      target="_blank"  在新标签页打开
+             "_self"   在本标签页打开（默认）
+
+      download="savename"  表示herf作为文件名下载
+
+      title="xxx"  链接注释
+    -->
+  <br>
+  <iframe src="iframe.html" width="600" height="400"></iframe>
+  <br>
+
+  <p id="demo">lululu</p>
+
+  <button id="button0" onclick="clickbutton()"
+    onkeydown="demo.innerHTML = 'keydown'">Button</button>
+  <br>
+
+  <img src="bear.jpeg" width="900" height="683" alt="bear">
+</body>
+
+</html>
+
+<script>
+  let button0 = document.getElementById("button0")
+  let demo = document.getElementById("demo")
+  // getElementById必须在html对象创建以后
+
+  button0.onmouseover = function () {
+    demo.innerHTML = "mouse over"
+  }
+
+  button0.onmouseout = function () {
+    demo.innerHTML = "mouse out"
+  }
+
+  function clickbutton() {
+    demo.innerHTML = "click"
+  }
+</script>

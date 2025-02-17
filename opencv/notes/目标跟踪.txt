@@ -1,0 +1,36 @@
+差值法：
+    // 适用于相机和背景不动的情况，计算图片之间的差值
+    void adsdiff(In src1, In src2, Out dst);
+        // 计算像素差的绝对值
+
+均值迁移法：
+    由一张概率分布矩阵，初始一个中心，在矩形（或圆形）邻域内，分方向计算各子区域的概率（加权）均值，
+    选择均值最大的方向作为迁移方向，迁移距离取决于均值的大小，更新中心，
+    迭代上述步骤
+    // 通常使用目标的直方图反向投影作为概率矩阵
+    // 最好初始一个和目标较近的区域
+
+    int meanShift(In probImage, Rect &window, TermCriteria criteria);
+        - window：初始和最终的匹配矩阵
+        // 输出算法是否成功收敛
+
+    // 自适应均值迁移法，用椭圆额外拟合
+    RotateRect CamShift(.../*同上*/);
+        // 输出的旋转矩形，可以用椭圆绘制
+
+光流法：
+    稠密光流法：
+        // 计算所有像素
+        // Farneback多项式扩展算法
+        void calcOpticalFlowFarneback(In prev, In next, InOut flow, double pyr_scale, int levels,
+            int winsize, int iterations, int poly_n, double poly_sigma, int flags);
+            - prev/next：前一帧和当前帧 CV_8UC1
+            - pyr_scale：0~1
+            - flags=OPTFLOW_
+                            USE_INITIAL_FLOW    使用输入的flow做初始流
+                            FARNEBACK_GAUSSIAN  使用高斯滤波器
+
+    LK稀疏光流法：
+        // 只计算部分像素（特征点）
+        void calcOpticalFlowPyrLK(In prevImg, In nextImg, In prevPts, InOut nextPts, Out status, Out err,
+            Size winSize=Size(21, 21), int maxLevel=3, TermCriteria, int flags=0, double minEigThreshold=1e-4);

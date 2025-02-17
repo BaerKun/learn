@@ -1,0 +1,152 @@
+卷积：
+    void filter2D(InArr src, OutArr dst, int ddepth, InArr kernel,
+        Point anchor=Point(-1, -1), double delta=0, int borderType=BORDER_DEFAULT);
+
+        - ddepth：输出矩阵的数据类型；-1则与输入相同
+        - kernel：CV_32FC1
+        - anchor：卷积核基准点（锚点）；默认是卷积核中心
+        - delta：输出偏移
+        - borderType：边界外推方法
+            // 输出和输入尺寸相同，默认使用外推
+
+
+随机数：
+    cvflann::seed_random(unsigned seed);
+
+    int cvflann::rand();
+
+    double cvflann::rand_double(double high=1.0, double low=0);
+
+    int cvflann::rand_int(int high=RAND_MAX, int low=0);
+
+    void cv::RNG::fill(InOutArr mat, int distType, InArr a, OutArr b, bool saturateRange=flase);
+        - mat：用于存放随机数；各个通道独立生成
+        - distType = RNG::UNIFORM（均匀分布） / NORMAL（高斯分布）
+        - a：下限（均匀）/ 均值（高斯）
+        - b：上限 / 标准差
+        - saturateRange：预饱和，即当输出值超过数据类型的范围时，取边界值
+        * 非静态，必须先创建RNG实例
+
+
+噪音：
+    椒盐噪音：图像像素随机地变成黑或白
+    高斯噪音：图像像素加上一个服从高斯分布的偏置
+
+
+滤波：
+    低通（高阻）滤波：允许低频信号通过，同时抑制或阻挡高频信号；
+        它的主要作用是平滑信号或图像，去除高频的噪声或细节。
+    // 也就是一种模糊
+
+        线性滤波：
+            均值滤波：
+                void blur(InArr src, OutArr dst, Size ksize,
+                    Point anchor=..., int borderType=...);
+                    - ksize：卷积核（滤波器）尺寸
+                    // 范围内像素均值代替原像素
+
+            方框滤波：
+                void boxFilter(InArr src, OutArr dst, int ddepth, Size ksize,
+                    Point anchor=..., bool normalize=true, int borderType=...)
+                    - normalize：归一化；
+                        true则和均值滤波相同；flase则只将范围内像素相加
+
+                void sqrBoxFilter(...);
+                    // 平方和
+
+            高斯滤波（=高斯模糊）：
+                void GaussianBlur(InArr src, OutArr dst, Size ksize,
+                    double sigmaX, double sigmaY=0, int borderType=...);
+                    - ksize：宽高必须是奇数或<=0；若<=，则根据sigmaXY计算
+                    - sigmaX/Y：x/y方向高斯分布的标准差
+                        若其中一个<=0，另一个>0，则都取>0的那个；
+                        若都<=0，则根据ksize计算
+
+                Mat getGaussianKernel(int ksize, double sigma, int ktype=CV_64F);
+                    - ktype = CV_32/64F
+                    // 计算一维高斯滤波器，参数与高斯滤波类似
+                    // 二维 = X * Y.T
+
+            可分离滤波：
+                // 所有二维滤波器都可以分离为x、y方向的一维滤波器
+                // 二维滤波可以等效为两次单方向滤波
+                void sepFilter2D(InArr src, OutArr dst, int ddepth,
+                    InArr kernelX, InArr kernelY, Point anchor=...,
+                    double delta=0, int borderType=...);
+                    // 等效于 Filter2D(..., kernel=kerelX * kernelY.t(), ...);
+
+        非线性滤波：
+            // 非固定滤波器；滤波器会随范围内像素值改变
+            中值滤波：
+                void medianBlur(InArr src, OutArr dst, int ksize);
+                    // 用滤波器范围内的像素中位数替代原像素
+
+            双边滤波：
+                void bilateralFilter(InArr src, OutArr dst, int d,
+                    double sigmaColor, double sigmaSpace, int borderType=...);
+                    // 滤波器权重由 空间和颜色 一起决定，在低通滤波的同时减少高频信号损失
+                    // 权重 W = Ws · Wc,
+                        Ws = Ks * GaussSpace(dist(p, q)) // 欧氏距离
+                        Wc = Kc * GaussColor(pixeldiff(p, q)) // 像素差
+                        分布由各自正态分布决定
+                    - d：领域直径，即滤波器（正方形）边长
+                    // d和sigmaSpace中若有一个<=0，则由另一个决定
+                    // 只能单或三通道
+
+    高通滤波：允许高频信号通过，同时抑制或阻挡低频信号；
+        它的主要作用是增强信号的变化部分，比如图像的边缘或音频中的突变。
+    // 也就是一种边缘检测
+
+        // 通过计算像素差分判断边界
+        // 差分算子：一维或二维的矩阵
+        filter2D(src, dst, CV_16S, kernel);
+
+        void Sobel(InArr src, OutArr dst, int ddepth, int dx, int dy,
+            int ksize=3, double scale=1, double delta=0,
+            int borderType=...);
+            // x方向一阶Sobel算子 =  [[  -1,  0,  1  ]
+                                    [  -2,  0,  2  ]
+                                    [  -1,  0,  1  ]]
+            // y方向 = x方向.T
+            - dx/dy：x/y方向算子差分阶数
+            - ksize：算子尺寸，只能1、3、5、7；
+                    若1，则 1*3 或 3*1；
+                    一般ksize = 差分阶数 * 2 + 1
+
+        void Scharr(...); // 无ksize，其余以Sobel相同
+        // x方向Scharr算子 = [[ -3,   0,  3  ]
+                             [ -10,  0,  10 ]
+                             [ -3,   0,  3  ]]
+        - dx/dy：只能0/1，且dx + dy == 1
+
+        void getDerivKernels(OutArr kx, OutArr ky, int dx, int dy,
+            int ksize, bool normalize=false. int ktype=CV_32F);
+            - kx/ky：ksize * 1的滤波器
+            - ksize = 1、3、5、7、FILTER_SCHARR
+                若ksize == FILTER_SCHARR，则输出Scharr算子
+                否则Sobel算子
+
+        void Laplacian(InArr src, OutArr dst, int ddepth, int ksize=1,
+            double scale=1, double delta=0, int borderType=...);
+            // Laplactian = ddf/ddx + ddf/ddy（二阶偏导数相加）
+            - ksize：正奇数；若ksize == 1,
+                    则 kernel =  [[   0,  1,  0   ]
+                                  [   1,  -4, 1   ]
+                                  [   0,  1,  0   ]]
+                    否则 kernel =（x + y）方向二阶Sobel算子
+
+        Canny算法：
+            1.高斯滤波减少噪音
+            2.用Sobel计算梯度
+            3.非极大值抑制；p和其梯度正负方向的q、r，检查grad(p) > max(grad(q), grad(r))，否则抑制
+            4.用双阈值划分强、弱边缘；threshold1 >= 弱 > threshold2 >= 强
+            5.消除孤立边缘。在弱边缘8格领域中寻找强边缘，若无，则去除
+
+            void Canny(InArr image, OutArr edges,
+                double threshold1, double threshold2,
+                int apertureSize=3, bool L2gradient=false);
+                - image：必须CV_8UC1/3
+                - apertureSize：Sobel算子直径
+                - L2gradient：梯度值计算方法
+                    false: grad = abs(dI/dx) + abs(dI/dy)
+                    true: gead = sqrt((dI/dx)**2 + (dI/dx)**2)
