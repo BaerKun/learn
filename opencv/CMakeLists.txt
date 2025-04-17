@@ -2,6 +2,8 @@ cmake_minimum_required(VERSION 3.27)
 
 project(learnCV)
 
+set(CMAKE_CXX_STANDARD 17)
+
 if(WIN32)
     set(OpenCV_DIR "C:\\_myLibs\\opencv-4.10\\build")
 endif()

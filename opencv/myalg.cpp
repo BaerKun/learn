@@ -235,45 +235,48 @@ int twoPass(const Mat &image, Mat &label, const int connectivity, const int labe
 
 void hist2img1D(const Mat &hist, Mat &img, const int width, const int height) {
     img = Mat::zeros(height, width, CV_8U);
-    const int npoints = hist.rows;
+    const int npts = hist.rows;
     float x = 0.f;
-    const float deltaX = (float) width / npoints,
+    const float deltaX = (float) width / (float) npts,
             *pVal = hist.ptr<float>();
-    Point lefttop(0, 0);
-    Point rightbottom(0, 0);
+    Point topleft(0, 0);
+    Point bottomright(0, 0);
     const Scalar color(255);
 
-    for (int p = 0; p < npoints; ++p) {
-        lefttop.x = x;
-        rightbottom.x = x += deltaX;
-        rightbottom.y = height * *pVal++;
-        rectangle(img, lefttop, rightbottom, color, -1);
+    for (int p = 0; p < npts; ++p) {
+        topleft.x = (int) x;
+        x += deltaX;
+        bottomright.x = (int) x;
+        bottomright.y = (int)((float) height * *pVal++);
+        rectangle(img, topleft, bottomright, color, -1);
     }
     flip(img, img, 0);
 }
 
-void hist2img2D(const Mat &hist, Mat &img, const int width, const int height, const double brigtnessHance) {
+void hist2img2D(const Mat &hist, Mat &img, const int width, const int height, const double brightnessHence) {
     img = Mat::ones(height, width, CV_8U);
-    const int npointsX = hist.cols,
-            npointsY = hist.rows;
+    const int nptsX = hist.cols,
+            nptsY = hist.rows;
     float x, y = 0.f;
     const float
-            deltaX = (float) width / npointsX,
-            deltaY = (float) height / npointsY,
+            deltaX = (float) width / (float) nptsX,
+            deltaY = (float) height / (float) nptsY,
             *pHistVal = hist.ptr<float>(0, 0);
-    Point lefttop(0, 0), rightbottom(0, 0);
+    Point topleft(0, 0), bottomright(0, 0);
     Scalar color(255.0);
 
     int r, c;
-    for (r = 0; r < npointsY; ++r) {
+    for (r = 0; r < nptsY; ++r) {
         x = 0.f;
-        lefttop.y = y;
-        rightbottom.y = y += deltaY;
-        for (c = 0; c < npointsX; ++c) {
-            lefttop.x = x;
-            rightbottom.x = x += deltaX;
-            *color.val = *pHistVal++ * 255.0 * brigtnessHance;
-            rectangle(img, lefttop, rightbottom, color, -1);
+        topleft.y = (int)y;
+        y += deltaY;
+        bottomright.y = (int)y;
+        for (c = 0; c < nptsX; ++c) {
+            topleft.x = (int)x;
+            x += deltaX;
+            bottomright.x = (int)x;
+            *color.val = *pHistVal++ * 255.0 * brightnessHence;
+            rectangle(img, topleft, bottomright, color, -1);
         }
     }
     flip(img, img, 0);
@@ -305,7 +308,7 @@ void histMatch(const Mat &src, const Mat &hist, Mat &dst) {
             if (ssum > dsum + *(pTarVal + 1))
                 continue;
         }
-        *pLutVal++ = mapVal;
+        *pLutVal++ = (uint8_t)mapVal;
         ssum += *++pSrcVal;
         ++i;
     }

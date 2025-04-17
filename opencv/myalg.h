@@ -13,7 +13,7 @@ int twoPass(const cv::Mat &image, cv::Mat &label, int connectivity = 8, int labe
 
 void hist2img1D(const cv::Mat &hist, cv::Mat &img, int width, int height);
 
-void hist2img2D(const cv::Mat &hist, cv::Mat &img, int width, int height, double brigtnessHance=10.);
+void hist2img2D(const cv::Mat &hist, cv::Mat &img, int width, int height, double brightnessHence=10.);
 
 void histMatch(const cv::Mat &src, const cv::Mat &hist, cv::Mat &dst);
 

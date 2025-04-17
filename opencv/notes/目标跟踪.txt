@@ -1,6 +1,6 @@
 差值法：
     // 适用于相机和背景不动的情况，计算图片之间的差值
-    void adsdiff(In src1, In src2, Out dst);
+    void absdiff(In src1, In src2, Out dst);
         // 计算像素差的绝对值
 
 均值迁移法：
