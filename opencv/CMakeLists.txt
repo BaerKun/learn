@@ -9,13 +9,17 @@ if(WIN32)
 endif()
 
 find_package(OpenCV)
-
 include_directories(${OpenCV_DIRS})
-
 link_libraries(${OpenCV_LIBS})
 
 add_executable(main main.cpp)
 
-add_library(somealg myalg.cpp)
+set(MVS_SDK_PATH /Library/MVS_SDK)
+include_directories(${MVS_SDK_PATH}/Includes)
+link_directories(${MVS_SDK_PATH}/lib)
 
-target_link_libraries(main somealg)
+add_executable(video video.cpp)
+target_link_libraries(video MvCameraControl)
+
+#add_library(somealg myalg.cpp)
+#target_link_libraries(main somealg)

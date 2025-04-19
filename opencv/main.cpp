@@ -2,13 +2,13 @@
 
 #include <opencv2/opencv.hpp>
 
-constexpr int OPEN_KERNAL_SIZE = 5;
+constexpr int OPEN_KERNAL_SIZE = 7;
 constexpr int CLOASE_KERNAL_SIZE = 9;
 constexpr float LARGE_FLOAT = 2048.f;
-constexpr size_t QUEUE_MAX_SIZE = 32;
-constexpr size_t THRESHOLD_MIN = 40;
-constexpr size_t THRESHOLD_MAX = 256;
-constexpr char VIDEO_PATH[] = "/Users/bearkun/wksp/learn/opencv/media/video1.mp4";
+constexpr size_t QUEUE_MAX_SIZE = 16;
+constexpr size_t THRESHOLD_MIN = 64;
+constexpr size_t THRESHOLD_MAX = 512;
+constexpr char VIDEO_PATH[] = "/Users/bearkun/wksp/learn/opencv/media/video2.mp4";
 
 void filter(const cv::Mat &src, cv::Mat &dst) {
     static const cv::Mat openKernal =
@@ -16,8 +16,8 @@ void filter(const cv::Mat &src, cv::Mat &dst) {
     static const cv::Mat erodeKernal =
             cv::getStructuringElement(cv::MORPH_ELLIPSE, cv::Size(CLOASE_KERNAL_SIZE, CLOASE_KERNAL_SIZE));
 
-//    cv::morphologyEx(src, dst, cv::MORPH_OPEN, openKernal);
-    cv::dilate(dst, dst, erodeKernal);
+    cv::morphologyEx(src, dst, cv::MORPH_OPEN, openKernal);
+//    cv::dilate(dst, dst, erodeKernal);
 }
 
 template<typename Tp_ = float>
@@ -45,6 +45,10 @@ public:
         return points;
     }
 
+    size_t getSize() const{
+        return size;
+    }
+
 private:
     InputArray points;
     size_t rear;
@@ -65,9 +69,9 @@ float pointLineDistance(const cv::Point2f &pt, const cv::Point2f &dir, const cv:
 
 // RANSAC 拟合直线
 cv::Vec4f ransacFitLine(const std::vector<cv::Point2f> &points,
-                        int iterations = 100,
+                        int iterations = 64,
                         float threshold = 1.0f,
-                        int min_inliers = 8) {
+                        int min_inliers = 4) {
     int best_inliers = 0;
     cv::Vec4f best_model;
 
@@ -116,13 +120,19 @@ int main() {
         return -1;
     }
 
+    cv::Rect roi;
     cv::Mat debug;
     cv::Mat lastGrayFrame, frame, gray, diff;
     std::vector<std::vector<cv::Point>> contours;
     PointQueue queue(QUEUE_MAX_SIZE);
     cv::Vec4f line;
     while (cap.read(frame)) {
-        cv::cvtColor(frame, gray, cv::COLOR_BGR2GRAY);
+        if(roi.empty()){
+            roi = cv::selectROI("select ROI", frame);
+            cv::destroyWindow("select ROI");
+        }
+
+        cv::cvtColor(frame(roi), gray, cv::COLOR_BGR2GRAY);
 
         if (lastGrayFrame.empty()) {
             swap(gray, lastGrayFrame);
@@ -136,16 +146,16 @@ int main() {
 
         cv::findContours(diff, contours, cv::RETR_EXTERNAL, cv::CHAIN_APPROX_SIMPLE);
         for (auto &contour: contours) {
-            if (contour.size() >= THRESHOLD_MIN && contour.size() <= THRESHOLD_MAX) {
-                cv::Rect rect = cv::boundingRect(contour);
+            const cv::Rect rect = cv::boundingRect(contour);
+            const int area = rect.area();
+            if (area >= THRESHOLD_MIN && area <= THRESHOLD_MAX) {
                 queue.emplace((float) rect.x + (float) rect.width / 2.f, (float) rect.y + (float) rect.height / 2.f);
-
-                cv::rectangle(diff, rect, 255);
+//                cv::rectangle(diff, rect, 255);
             }
         }
 
         if (debug.empty()) {
-            debug = cv::Mat(frame.size(), CV_8UC1);
+            debug = cv::Mat(gray.size(), CV_8UC1);
         }
 
         debug.setTo(0);
@@ -155,7 +165,7 @@ int main() {
 
         if (queue.ready()) {
             line = ransacFitLine(queue.getInputArray());
-            printf("line: %f, %f, %f, %f\n", line[0], line[1], line[2], line[3]);
+//            printf("line: %f, %f, %f, %f\n", line[0], line[1], line[2], line[3]);
 //            cv::fitLine(queue.getInputArray(), line, cv::DIST_L2, 0, 0.01, 0.01);
             const cv::Point2f p1(line[2] - line[0] * LARGE_FLOAT, line[3] - line[1] * LARGE_FLOAT);
             const cv::Point2f p2(line[2] + line[0] * LARGE_FLOAT, line[3] + line[1] * LARGE_FLOAT);
@@ -165,7 +175,7 @@ int main() {
 
         cv::imshow("diff", diff);
         cv::imshow("debug", debug);
-        const int key = cv::waitKey(50);
+        const int key = cv::waitKey(1);
         if (key == 27) {
             break;
         }
